@@ -1,9 +1,28 @@
-- name: configuring mongodb server
-  become: yes
-  hosts: mongodb
+# This playbook configures a MongoDB server on hosts in the 'mongodb' group.
+# Steps:
+#   1. Copies the MongoDB YUM repository file to the target server.
+#   2. Installs the MongoDB package using the copied repository.
+#   3. Starts and enables the MongoDB service.
+
+- name: Configure and install MongoDB server           # Play to configure MongoDB server
+  hosts: mongodb                                      # Target hosts in the 'mongodb' group
+  become: yes                                         # Run tasks with sudo/root privileges
   tasks:
-  - name: copy mongodb repo 
-    ansible.builtin.copy:
-      src: mongo.repo
-      dest: /etc/yum.repos.d/mongo.repo
-      
+    # Task 1: Copy the MongoDB repository file to the target server
+    - name: Copy MongoDB repo file
+      ansible.builtin.copy:
+        src: mongo.repo                               # Local repo file to copy (should be in your playbook directory)
+        dest: /etc/yum.repos.d/mongo.repo             # Destination path on the target server
+
+    # Task 2: Install the MongoDB package using the copied repo
+    - name: Install mongodb-org package
+      ansible.builtin.package:
+        name: mongodb-org                             # Name of the MongoDB package to install
+        state: present                               # Ensure the package is installed
+
+    # Task 3: Start and enable the MongoDB service
+    - name: start and enable mongodb
+      ansible.builtin.service:
+        name: mongodb                                # Name of the MongoDB service
+        state: started                               # Ensure the service is running
+        enabled: yes                                 # Enable the service to start on boot
