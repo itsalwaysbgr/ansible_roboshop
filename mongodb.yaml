@@ -23,6 +23,6 @@
     # Task 3: Start and enable the MongoDB service
     - name: start and enable mongodb
       ansible.builtin.service:
-        name: mongodb                                # Name of the MongoDB service
+        name: mongod                                 # Name of the MongoDB service
         state: started                               # Ensure the service is running
         enabled: yes                                 # Enable the service to start on boot
