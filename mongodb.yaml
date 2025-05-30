@@ -26,3 +26,9 @@
         name: mongod                                 # Name of the MongoDB service
         state: started                               # Ensure the service is running
         enabled: yes                                 # Enable the service to start on boot
+
+    - name: allow remot econnection
+      ansible.builtin.replace:
+        path: /etc/mongod.conf 
+        regexp: "127.0.0.1"
+        replace: "0.0.0.0"
