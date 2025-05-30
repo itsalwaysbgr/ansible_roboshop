@@ -3,6 +3,8 @@
 #   1. Copies the MongoDB YUM repository file to the target server.
 #   2. Installs the MongoDB package using the copied repository.
 #   3. Starts and enables the MongoDB service.
+#   4. Updates MongoDB config to allow remote connections.
+#   5. Restarts MongoDB to apply configuration changes.
 
 - name: Configure and install MongoDB server           # Play to configure MongoDB server
   hosts: mongodb                                      # Target hosts in the 'mongodb' group
@@ -21,19 +23,21 @@
         state: present                               # Ensure the package is installed
 
     # Task 3: Start and enable the MongoDB service
-    - name: start and enable mongodb
+    - name: Start and enable mongod service
       ansible.builtin.service:
         name: mongod                                 # Name of the MongoDB service
         state: started                               # Ensure the service is running
         enabled: yes                                 # Enable the service to start on boot
 
-    - name: allow remot econnection
+    # Task 4: Allow remote connections by updating bindIp in mongod.conf
+    - name: Allow remote connection
       ansible.builtin.replace:
-        path: /etc/mongod.conf 
-        regexp: "127.0.0.1"
-        replace: "0.0.0.0"
+        path: /etc/mongod.conf                       # Path to MongoDB config file
+        regexp: "127.0.0.1"                          # Find the default bind IP
+        replace: "0.0.0.0"                           # Replace with 0.0.0.0 to allow all IPs
 
-    - name: restart mongodb
+    # Task 5: Restart MongoDB to apply configuration changes
+    - name: Restart mongod service
       ansible.builtin.service:
-        name: mongod
-        state: restarted                            # Restart the MongoDB service to apply changes
+        name: mongod                                 # Name of the MongoDB service
+        state: restarted                             # Restart the service to apply config changes
