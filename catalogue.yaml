@@ -35,24 +35,23 @@
     ansible.builtin.unarchive:
       src: /tmp/catalogue.zip
       dest: /app
-      remote_src: true
-
+      remote_src: yes
 
   - name: Installing NodeJS dependencies
     community.general.npm:
-    path: /app
-  
-  - name: copy catalogue service file
+      path: /app
+
+  - name: Copy catalogue service file
     ansible.builtin.copy:
       src: catalogue.service
       dest: /etc/systemd/system/catalogue.service
 
   - name: Reload systemd daemon
     ansible.builtin.systemd:
-      daemon_reload: true
+      daemon_reload: yes
 
-  - name: start and enable catalogue service
-    ansible.builtin.service:
+  - name: Start and enable catalogue service
+    ansible.builtin.systemd:
       name: catalogue
       state: started
-      enabled: true 
+      enabled: yes
