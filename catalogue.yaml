@@ -77,4 +77,5 @@
 
     - name: load products
       ansible.builtin.command : mongosh --host mongodb.daws86s.site /app/schema/catalogue.js
-      when: catalogue_output.stdout < '0'
+      when: catalogue_output.stdout | int < 0
+      
