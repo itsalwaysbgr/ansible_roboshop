@@ -67,7 +67,7 @@
         state: present
 
     - name: check products loaded or not
-      ansible.builtin.command: mongosh --host mongodb.daws86s.site --eval 'db.getMongo().getDBNames().indexOf("catalogue")'
+      ansible.builtin.shell: mongosh --host mongodb.daws86s.site --eval 'db.getMongo().getDBNames().indexOf("catalogue")'
       register: catalogue_output
 
     - name: print catalogue output
@@ -78,4 +78,3 @@
     - name: load products
       ansible.builtin.command : mongosh --host mongodb.daws86s.site /app/schema/catalogue.js
       when: catalogue_output.stdout | int < 0
-      
