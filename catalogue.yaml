@@ -3,55 +3,73 @@
   hosts: catalogue
   become: yes
   tasks:
-  - name: Disable default NodeJS
-    ansible.builtin.command: "dnf module disable nodejs -y"
+    - name: Disable default NodeJS
+      ansible.builtin.command: "dnf module disable nodejs -y"
 
-  - name: Enable NodeJS 20
-    ansible.builtin.command: "dnf module enable nodejs:20 -y"
+    - name: Enable NodeJS 20
+      ansible.builtin.command: "dnf module enable nodejs:20 -y"
+      
+    - name: Installing NodeJS package
+      ansible.builtin.dnf:
+        name: nodejs
+        state: present
+
+    - name: Creating roboshop system user
+      ansible.builtin.user:
+        name: roboshop
+        shell: /sbin/nologin
+        system: true
+        home: /app
+
+    - name: Creating app directory
+      ansible.builtin.file:
+        path: /app
+        state: directory
+
+    - name: Downloading catalogue component
+      ansible.builtin.get_url:
+        url: https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip
+        dest: /tmp/catalogue.zip
+
+    - name: Extracting catalogue component
+      ansible.builtin.unarchive:
+        src: /tmp/catalogue.zip
+        dest: /app
+        remote_src: yes
+
+    - name: Installing NodeJS dependencies
+      community.general.npm:
+        path: /app
+
+    - name: Copy catalogue service file
+      ansible.builtin.copy:
+        src: catalogue.service
+        dest: /etc/systemd/system/catalogue.service
+
+    - name: Reload systemd daemon
+      ansible.builtin.systemd:
+        daemon_reload: yes
+
+    - name: Start and enable catalogue service
+      ansible.builtin.systemd:
+        name: catalogue
+        state: started
+        enabled: yes
     
-  - name: Installing NodeJS package
-    ansible.builtin.dnf:
-      name: nodejs
-      state: present
+    - name: Copy MongoDB repo file
+      ansible.builtin.copy:
+        src: mongo.repo
+        dest: /etc/yum.repos.d/mongo.repo
 
-  - name: Creating roboshop system user
-    ansible.builtin.user:
-      name: roboshop
-      shell: /sbin/nologin
-      system: true
-      home: /app
+    - name: Install mongodb client
+      ansible.builtin.dnf:
+        name: mongodb-mongosh
+        state: present
 
-  - name: Creating app directory
-    ansible.builtin.file:
-      path: /app
-      state: directory
+    - name: check products loaded or not
+      ansible.builtin.command: mongosh --host mongodb.daws86s.site --eval 'db.getMongo().getDBNames().indexOf("catalogue")'
+      register: catalogue_output
 
-  - name: Downloading catalogue component
-    ansible.builtin.get_url:
-      url: https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip
-      dest: /tmp/catalogue.zip
-
-  - name: Extracting catalogue component
-    ansible.builtin.unarchive:
-      src: /tmp/catalogue.zip
-      dest: /app
-      remote_src: yes
-
-  - name: Installing NodeJS dependencies
-    community.general.npm:
-      path: /app
-
-  - name: Copy catalogue service file
-    ansible.builtin.copy:
-      src: catalogue.service
-      dest: /etc/systemd/system/catalogue.service
-
-  - name: Reload systemd daemon
-    ansible.builtin.systemd:
-      daemon_reload: yes
-
-  - name: Start and enable catalogue service
-    ansible.builtin.systemd:
-      name: catalogue
-      state: started
-      enabled: yes
+    - name: print catalogue output
+      ansible.builtin.debug:
+        msg: "{{ catalogue_output }}"
