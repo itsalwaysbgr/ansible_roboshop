@@ -73,3 +73,8 @@
     - name: print catalogue output
       ansible.builtin.debug:
         msg: "{{ catalogue_output }}"
+     
+
+    - name: load products
+      ansible.builtin.command : mongosh --host mongodb.daws86s.site /app/schema/catalogue.js
+      when: catalogue_output.stdout < '0'
