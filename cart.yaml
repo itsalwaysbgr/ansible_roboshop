@@ -20,7 +20,7 @@
       state: directory
 
   - name: create roboshop system cart
-    ansible.builtin.cart:
+    ansible.builtin.user:
       name: roboshop
       shell: /sbin/nologin
       system: true
