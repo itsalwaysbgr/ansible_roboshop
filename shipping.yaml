@@ -5,7 +5,7 @@
   - name: installing maven 
     ansible.builtin.dnf:
       name: maven
-      state: insalled
+      state: installed
 
 
   - name: create roboshop system user
