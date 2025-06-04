@@ -78,6 +78,4 @@
   - name: load products
     ansible.builtin.shell: mongosh --host mongodb.daws86s.site < /app/db/master-data.js
     when: catalogue_output.stdout | int < 0
-
-  
   
